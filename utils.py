@@ -6,6 +6,7 @@ MicroPyServer is a simple HTTP server for MicroPython projects.
 The MIT License
 
 Copyright (c) 2019 troublegum. https://github.com/troublegum/micropyserver
+Copyright (c) 2024 Ferdinando Grossi https://github.com/ferdinandog/micropyserver
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -141,16 +142,21 @@ def get_request_query_params(request):
     return parse_query_string(query_string)
 
 
-def get_request_post_params(request):
-    """ return params from POST request """
+def get_request_post_params(request, expected_method='POST'):
+    """ return params from POST or other specified type of request """
     request_method = get_request_method(request)
-    if request_method != "POST":
+    if request_method != expected_method:
         return None
+    return parse_query_string(get_request_body(request))
+
+
+def get_request_body(request):
+    """ return body from request """
     match = re.search("\r\n\r\n(.+)", request)
     if match is None:
         return {}
     query_string = match.group(1)
-    return parse_query_string(query_string)
+    return query_string
 
 
 def unquote(string):

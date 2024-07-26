@@ -12,6 +12,7 @@ Use [Thonny IDE](https://thonny.org/) or other IDE for upload your code in ESP82
 ## Quick start
 
 ### Typical Wi-Fi connection code for ESP board
+
 ```
 import network
 
@@ -23,9 +24,8 @@ wlan.active(True)
 
 while not wlan.isconnected():
     wlan.connect(wlan_id, wlan_pass)
-print("Connected... IP: " + wlan.ifconfig()[0])  
+print("Connected... IP: " + wlan.ifconfig()[0])
 ```
-
 
 ### Hello world example
 
@@ -59,7 +59,7 @@ from micropyserver import MicroPyServer
 def show_index(request):
     ''' main request handler '''
     server.send("THIS IS INDEX PAGE!")
-    
+
 def another_action(request):
     ''' another action handler '''
     server.send("THIS IS ANOTHER ACTION!")
@@ -108,12 +108,12 @@ from micropyserver import MicroPyServer
 def show_index(request):
     ''' main request handler '''
     server.send("THIS IS INDEX PAGE!")
-    
+
 def on_request_handler(request, address):
     if str(address[0]) != "127.0.0.1":
         server.send("HTTP/1.0 403\r\n\r\n")
         server.send("ACCESS DENIED!")
-        return False        
+        return False
     return True
 
 
@@ -124,7 +124,7 @@ server.add_route("/", show_index)
 server.on_request(on_request_handler)
 ''' start server '''
 server.start()
-``` 
+```
 
 ### Turn ON / OFF a LED example
 
@@ -152,8 +152,8 @@ wlan.active(True)
 
 while not wlan.isconnected():
     wlan.connect(wlan_id, wlan_pass)
-print("Connected... IP: " + wlan.ifconfig()[0])    
-    
+print("Connected... IP: " + wlan.ifconfig()[0])
+
 def do_on(request):
     ''' on request handler '''
     pin.value(1)
@@ -163,9 +163,9 @@ def do_off(request):
     ''' off request handler '''
     pin.value(0)
     server.send("OFF")
-    
+
 def do_index(request):
-    ''' index request handler '''    
+    ''' index request handler '''
     server.send("SWITCH ON/OFF")
 
 pin = machine.Pin(13, machine.Pin.OUT)
@@ -175,10 +175,11 @@ server.add_route("/", do_index)
 server.add_route("/on", do_on)
 server.add_route("/off", do_off)
 ''' start server '''
-server.start()    
-```    
+server.start()
+```
 
 ### Use utils for create response
+
 ```
 from micropyserver import MicroPyServer
 import utils
@@ -202,6 +203,7 @@ server.start()
 ```
 
 ### Parse HTTP request. Get query params from request.
+
 Type in browser http://IP_ADDRESS_ESP/?param_one=one&param_two=two
 
 ```
@@ -213,7 +215,7 @@ import utils
 
 def show_params(request):
     ''' request handler '''
-	params = utils.get_request_query_params(request)	
+	params = utils.get_request_query_params(request)
 	print(params)
 	''' will return {"param_one": "one", "param_two": "two"} '''
 
@@ -225,12 +227,11 @@ server.start()
 
 ```
 
-
 ## MicroPyServer methods
 
 Constructor - srv = MicroPyServer(host="0.0.0.0", port=80)
 
-Start server - srv.start() 
+Start server - srv.start()
 
 Stop server - srv.stop()
 
@@ -246,7 +247,6 @@ Set handler on 404 - server.on_not_found(handler)
 
 Set handler on server error - server.on_error(handler)
 
-
 ## Utils methods
 
 Send response to client - utils.send_response(server, response, http_code=200, content_type="text/html", extend_headers=None)
@@ -259,6 +259,8 @@ Return params from query string (example of return value: {"param_one": "one", "
 
 Return http request query params (example of return value: {"param_one": "one", "param_two": "two"}) - utils.get_request_query_params(request)
 
-Return params from POST request (example of return value: {"param_one": "one", "param_two": "two"}) - utils.get_request_post_params(request)
+Return params from POST or other request (example of return value: {"param_one": "one", "param_two": "two"}) - utils.get_request_post_params(request, expected_method='POST')
 
-Unquote string - unquote(string) 
+Return body from any request (example of return value: 'NEW Text to print') - utils.get_request_body(request)
+
+Unquote string - unquote(string)
