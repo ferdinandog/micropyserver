@@ -6,6 +6,7 @@ MicroPyServer is a simple HTTP server for MicroPython projects.
 The MIT License
 
 Copyright (c) 2019 troublegum. https://github.com/troublegum/micropyserver
+Copyright (c) 2024 Ferdinando Grossi https://github.com/ferdinandog/micropyserver
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +39,7 @@ class MicroPyServer(object):
         self._host = host
         self._port = port
         self._routes = []
+        self._file_get_route = None
         self._connect = None
         self._on_request_handler = None
         self._on_not_found_handler = None
@@ -50,7 +52,7 @@ class MicroPyServer(object):
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind((self._host, self._port))
         self._sock.listen(1)
-        print("Server start")
+        # print("Server start")
         while True:
             if self._sock is None:
                 break
@@ -78,18 +80,31 @@ class MicroPyServer(object):
         self._connect.close()
         self._sock.close()
         self._sock = None
-        print("Server stop")
+        # print("Server stop")
 
     def add_route(self, path, handler, method="GET"):
         """ Add new route  """
         self._routes.append(
             {"path": path, "handler": handler, "method": method})
 
+    def add_file_get_route(self, extensions, handler):
+        """ Enable route to get files of specified extension from filesystem  """
+        if len(extensions) == 0:
+            self._file_get_route = None
+        else:    
+            self._file_get_route = {"handler": handler, "extensions": extensions}
+
     def send(self, data):
         """ Send data to client """
         if self._connect is None:
             raise Exception("Can't send response, no connection instance")
         self._connect.sendall(data.encode())
+
+    def send_binary(self, data):
+        """ Send data to client """
+        if self._connect is None:
+            raise Exception("Can't send response, no connection instance")
+        self._connect.sendall(data)
 
     def find_route(self, request):
         """ Find route """
@@ -104,8 +119,20 @@ class MicroPyServer(object):
             else:
                 match = re.search("^" + route["path"] + "$", path)
                 if match:
-                    print(method, path, route["path"])
+                    # print(method, path, route["path"])
                     return route
+        if self._file_get_route and method == 'GET':
+            regex_expr = '(\w+\.('
+            for ext in self._file_get_route["extensions"]:
+                if regex_expr != '(\w+\.(':
+                    regex_expr += '|'
+                regex_expr += ext
+            regex_expr += ')$)'
+            match = re.search(regex_expr, path)
+            if match: 
+                if re.search('\.\.|\/~\/|\/\/', path):
+                    return None
+                return self._file_get_route
 
     def get_request(self, buffer_length=4096):
         """ Return request body """
@@ -149,6 +176,5 @@ class MicroPyServer(object):
             self.send("HTTP/1.0 500 Internal Server Error\r\n")
             self.send("Content-Type: text/plain\r\n\r\n")
             self.send("Error: " + str_error)
-            print(str_error)
-
+            # print(str_error)
 

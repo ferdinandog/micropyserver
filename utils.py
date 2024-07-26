@@ -91,11 +91,28 @@ HTTP_CODES = {
     511: 'Network authentication required',
 }
 
+""" File extension to MIME type """
+MIME_TYPES = {
+    'htm': 'text/html',
+    'html': 'text/html',
+    'txt': 'text/plain',
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'json': 'application/json',
+    'css': 'text/css',
+    'ico': 'image/vnd.microsoft.icon',
+    'js': 'text/javascript',
+    'cjs': 'text/javascript',
+    'vsg': 'image/svg+xml',
+    'webp': 'image/webp',
+    'map': 'application/octet-stream'
+}
 
 def send_response(server, response, http_code=200, content_type="text/html", extend_headers=None):
     """ send response """
     server.send("HTTP/1.0 " + str(http_code) + " " + HTTP_CODES.get(http_code) + "\r\n")
-    server.send("Content type:" + content_type + "\r\n")
+    server.send("Content-Type:" + content_type + "\r\n")
     if extend_headers is not None:
         for header in extend_headers:
             server.send(header + "\r\n")
@@ -103,10 +120,28 @@ def send_response(server, response, http_code=200, content_type="text/html", ext
     server.send(response)
 
 
+def send_binary_response(server, response, file_size, http_code=200, content_type="application/octet-stream", extend_headers=None):
+    """ send response """
+    server.send("HTTP/1.0 " + str(http_code) + " " + HTTP_CODES.get(http_code) + "\r\n")
+    server.send("Content-Type:" + content_type + "\r\n")
+    server.send("Content-Length:" + str(file_size) + "\r\n")
+    if extend_headers is not None:
+        for header in extend_headers:
+            server.send(header + "\r\n")
+    server.send("\r\n")
+    server.send_binary(response)
+
+
 def get_request_method(request):
     """ return http request method """
     lines = request.split("\r\n")
     return re.search("^([A-Z]+)", lines[0]).group(1)
+
+
+def get_request_path(request):
+    """ return http request path """
+    lines = request.split("\r\n")
+    return re.search("^[A-Z]+\\s+(/[-a-zA-Z0-9_.]*)*", lines[0]).group(1)
 
 
 def get_request_query_string(request):
