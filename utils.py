@@ -141,7 +141,7 @@ def get_request_method(request):
 def get_request_path(request):
     """ return http request path """
     lines = request.split("\r\n")
-    return re.search("^[A-Z]+\\s+(/[-a-zA-Z0-9_.]*)*", lines[0]).group(1)
+    return re.search("^[A-Z]+\\s+((/[-a-zA-Z0-9_.]*)*)", lines[0]).group(1)
 
 
 def get_request_query_string(request):

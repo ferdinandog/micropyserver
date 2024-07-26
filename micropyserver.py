@@ -110,7 +110,7 @@ class MicroPyServer(object):
         """ Find route """
         lines = request.split("\r\n")
         method = re.search("^([A-Z]+)", lines[0]).group(1)
-        path = re.search("^[A-Z]+\\s+(/[-a-zA-Z0-9_.]*)", lines[0]).group(1)
+        path = re.search("^[A-Z]+\\s+((/[-a-zA-Z0-9_.]*)*)", lines[0]).group(1)
         for route in self._routes:
             if method != route["method"]:
                 continue
@@ -122,17 +122,20 @@ class MicroPyServer(object):
                     # print(method, path, route["path"])
                     return route
         if self._file_get_route and method == 'GET':
-            regex_expr = '(\w+\.('
+            regex_expr = '\\w+\\.('
             for ext in self._file_get_route["extensions"]:
-                if regex_expr != '(\w+\.(':
+                if regex_expr != '\\w+\\.(':
                     regex_expr += '|'
                 regex_expr += ext
-            regex_expr += ')$)'
-            match = re.search(regex_expr, path)
+            regex_expr += ')$'
+            match = re.search(regex_expr, path)            
             if match: 
-                if re.search('\.\.|\/~\/|\/\/', path):
+                if re.search('\\.\\.|\/~\/|\/\/', path):
+                    # print('invalid chars in path: ' + path)
                     return None
                 return self._file_get_route
+            # else:
+            #     print('invalid match of path: ' + path)
 
     def get_request(self, buffer_length=4096):
         """ Return request body """
