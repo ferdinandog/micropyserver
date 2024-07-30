@@ -104,7 +104,7 @@ MIME_TYPES = {
     'ico': 'image/vnd.microsoft.icon',
     'js': 'text/javascript',
     'cjs': 'text/javascript',
-    'vsg': 'image/svg+xml',
+    'svg': 'image/svg+xml',
     'webp': 'image/webp',
     'map': 'application/octet-stream'
 }
