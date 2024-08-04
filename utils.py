@@ -187,11 +187,10 @@ def get_request_post_params(request, expected_method='POST'):
 
 def get_request_body(request):
     """ return body from request """
-    match = re.search("\r\n\r\n(.+)", request)
-    if match is None:
+    body_pos = request.find("\r\n\r\n")
+    if body_pos == -1:
         return {}
-    query_string = match.group(1)
-    return query_string
+    return request[body_pos:]
 
 
 def unquote(string):
