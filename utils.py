@@ -190,6 +190,7 @@ def get_request_body(request):
     body_pos = request.find("\r\n\r\n")
     if body_pos == -1:
         return {}
+    body_pos += 4
     return request[body_pos:]
 
 
